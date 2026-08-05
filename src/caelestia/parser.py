@@ -94,6 +94,9 @@ def parse_args() -> tuple[argparse.ArgumentParser, argparse.Namespace]:
     record_parser.add_argument("-s", "--sound", action="store_true", help="record audio")
     record_parser.add_argument("-p", "--pause", action="store_true", help="pause/resume the recording")
     record_parser.add_argument("-c", "--clipboard", action="store_true", help="copy recording path to clipboard")
+    record_parser.add_argument(
+        "-f", "--fps", type=int, help="the recording frame rate (defaults to the monitor's refresh rate)"
+    )
 
     # Create parser for clipboard opts
     clipboard_parser = command_parser.add_parser("clipboard", help="open clipboard history")

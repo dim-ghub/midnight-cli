@@ -198,6 +198,7 @@ All configuration options are in `~/.config/caelestia/cli.json`.
 ```json
 {
     "record": {
+        "refreshRate": 60,
         "extraArgs": []
     },
     "wallpaper": {
@@ -275,3 +276,5 @@ All configuration options are in `~/.config/caelestia/cli.json`.
 ```
 
 </details>
+
+- `record.refreshRate` sets the recording frame rate. When omitted or `null`, the focused monitor's refresh rate is used. It can also be overridden per invocation with `caelestia record --fps <rate>`.

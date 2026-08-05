@@ -33,8 +33,28 @@ class Command:
     def intersects(self, a: tuple[int, int, int, int], b: tuple[int, int, int, int]) -> bool:
         return a[0] < b[0] + b[2] and a[0] + a[2] > b[0] and a[1] < b[1] + b[3] and a[1] + a[3] > b[1]
 
+    def fps(self) -> int | None:
+        """Resolve the recording frame rate: CLI flag, then config, then display default."""
+        if self.args.fps is not None:
+            return self.args.fps
+
+        config = get_config()
+        try:
+            refresh_rate = config["record"]["refreshRate"]
+        except (KeyError, TypeError):
+            return None
+
+        if refresh_rate is None:
+            return None
+
+        try:
+            return int(refresh_rate)
+        except (TypeError, ValueError) as e:
+            raise ValueError(f"Config option 'record.refreshRate' should be a number: {e}")
+
     def start(self) -> None:
         args = ["-w"]
+        fps = self.fps()
 
         monitors = hypr.message("monitors")
         if self.args.region:
@@ -50,16 +70,20 @@ class Command:
 
             w, h, x, y = map(int, m.groups())
             r = x, y, w, h
-            max_rr = 0
-            for monitor in monitors:
-                if self.intersects((monitor["x"], monitor["y"], monitor["width"], monitor["height"]), r):
-                    rr = round(monitor["refreshRate"])
-                    max_rr = max(max_rr, rr)
-            args += ["-f", str(max_rr)]
+            if fps is None:
+                max_rr = 0
+                for monitor in monitors:
+                    if self.intersects((monitor["x"], monitor["y"], monitor["width"], monitor["height"]), r):
+                        rr = round(monitor["refreshRate"])
+                        max_rr = max(max_rr, rr)
+                fps = max_rr
+            args += ["-f", str(fps)]
         else:
             focused_monitor = next(monitor for monitor in monitors if monitor["focused"])
             if focused_monitor:
-                args += [focused_monitor["name"], "-f", str(round(focused_monitor["refreshRate"]))]
+                if fps is None:
+                    fps = round(focused_monitor["refreshRate"])
+                args += [focused_monitor["name"], "-f", str(fps)]
 
         if self.args.sound:
             args += ["-a", "default_output"]

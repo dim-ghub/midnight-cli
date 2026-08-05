@@ -108,6 +108,7 @@ complete -c caelestia -n "$seen screenshot" -s 'f' -l 'freeze' -d 'Freeze while 
 complete -c caelestia -n "$seen record" -s 'r' -l 'region' -d 'Capture region'
 complete -c caelestia -n "$seen record" -s 's' -l 'sound' -d 'Capture sound'
 complete -c caelestia -n "$seen record" -s 'c' -l 'clipboard' -d 'Copy recording path to clipboard'
+complete -c caelestia -n "$seen record" -s 'f' -l 'fps' -d 'Recording frame rate'
 
 # Clipboard
 complete -c caelestia -n "$seen clipboard" -s 'd' -l 'delete' -d 'Delete from cliboard history'
