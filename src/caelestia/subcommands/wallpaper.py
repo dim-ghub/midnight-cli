@@ -1,7 +1,13 @@
 import json
 from argparse import Namespace
 
-from caelestia.utils.wallpaper import get_colours_for_wall, get_wallpaper, set_random, set_wallpaper
+from caelestia.utils.wallpaper import (
+    extract_all_video_thumbs,
+    get_colours_for_wall,
+    get_wallpaper,
+    set_random,
+    set_wallpaper,
+)
 
 
 class Command:
@@ -17,5 +23,8 @@ class Command:
             set_wallpaper(self.args.file, self.args.no_smart)
         elif self.args.random:
             set_random(self.args)
+        elif getattr(self.args, "extract_thumbs", False):
+            extract_all_video_thumbs()
         else:
             print(get_wallpaper() or "No wallpaper set")
+

@@ -26,20 +26,51 @@ from caelestia.utils.theme import apply_colours
 
 
 def is_valid_image(path: Path) -> bool:
-    return path.is_file() and path.suffix.lower() in [
-        ".jpg", ".jpeg", ".png", ".webp", ".tif", ".tiff", ".gif",
-        ".mp4", ".mkv", ".avi", ".webm",
-    ]
+    return path.is_file() and path.suffix.lower() in [".jpg", ".jpeg", ".png", ".webp", ".tif", ".tiff", ".gif"]
 
 
 def is_video(path: Path) -> bool:
-    return path.is_file() and path.suffix.lower() in [".mp4", ".mkv", ".avi", ".webm"]
+    return path.is_file() and path.suffix.lower() in [".mp4", ".webm", ".mkv"]
+
+
+def djb2_hash(s: str) -> str:
+    hash_val = 5381
+    for char in s:
+        hash_val = ((hash_val << 5) + hash_val + ord(char)) & 0xFFFFFFFF
+    return str(hash_val)
+
+
+def extract_thumbnail(video_path: Path, output_path: Path):
+    try:
+        duration = subprocess.run(
+            ["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(video_path)],
+            capture_output=True, text=True, check=True
+        ).stdout.strip()
+        duration = float(duration) if duration else 0
+
+        # Seek to 30% into the clip, capped so we never land past the end
+        seek = max(0.1, min(duration * 0.3, duration - 0.1)) if duration > 0.3 else 0.1
+        
+        subprocess.run(
+            [
+                "ffmpeg", "-y",
+                "-ss", str(seek),
+                "-i", str(video_path),
+                "-vframes", "1",
+                "-vf", "scale=-1:720",
+                "-q:v", "2",
+                "-update", "1",
+                str(output_path)
+            ],
+            check=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
+        )
+    except subprocess.CalledProcessError:
+        pass
 
 
 def check_wall(wall: Path, filter_size: tuple[int, int], threshold: float) -> bool:
-    if is_video(wall):
-        return True
-
     with Image.open(wall) as img:
         width, height = img.size
         return width >= filter_size[0] * threshold and height >= filter_size[1] * threshold
@@ -74,7 +105,7 @@ def get_thumb(wall: Path, cache: Path) -> Path:
     if not thumb.exists():
         with Image.open(wall) as img:
             img = img.convert("RGB")
-            img.thumbnail((128, 128), Image.Resampling.NEAREST)
+            img.thumbnail((128, 128), Image.Resampling.BOX)
             thumb.parent.mkdir(parents=True, exist_ok=True)
             img.save(thumb, "JPEG")
 
@@ -93,7 +124,7 @@ def get_smart_opts(wall: Path, cache: Path) -> dict:
 
     with Image.open(get_thumb(wall, cache)) as img:
         opts["variant"] = get_variant(img)
-        img.thumbnail((1, 1), Image.Resampling.LANCZOS)
+        img.thumbnail((1, 1), Image.Resampling.BOX)
 
         # Cast the pixel to a tuple of 3 integers to safely unpack it
         pixel = cast(tuple[int, int, int], img.getpixel((0, 0)))
@@ -143,7 +174,7 @@ def get_colours_for_wall(wall: Path | str, no_smart: bool) -> None:
 
 def convert_gif(wall: Path) -> Path:
     cache = wallpapers_cache_dir / compute_hash(wall)
-    output_path = cache / "first_frame.png"
+    output_path = cache / "first_frame.jpg"
 
     if not output_path.exists():
         output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -154,35 +185,127 @@ def convert_gif(wall: Path) -> Path:
                 pass
 
             img = img.convert("RGB")
-            img.save(output_path, "PNG")
+            img.save(output_path, "JPEG", quality=90)
 
     return output_path
 
 
 def convert_video(wall: Path) -> Path:
+    from caelestia.utils.paths import c_cache_dir
+    fast_thumb = c_cache_dir / "videothumbs" / f"{djb2_hash(str(wall.resolve()))}.jpg"
+    if fast_thumb.exists():
+        return fast_thumb
+    
     cache = wallpapers_cache_dir / compute_hash(wall)
-    output_path = cache / "first_frame.png"
-
+    output_path = cache / "first_frame.jpg"
+    
     if not output_path.exists():
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        subprocess.run(
-            ["ffmpeg", "-i", str(wall), "-vframes", "1", "-q:v", "2", str(output_path)],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            check=True
-        )
+        try:
+            duration_proc = subprocess.run(
+                ["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(wall)],
+                capture_output=True, text=True, timeout=1.0
+            )
+            duration_str = duration_proc.stdout.strip()
+            duration = float(duration_str) if duration_str else 0.0
 
+            seek_time = max(1.0, min(duration * 0.2, 4.0)) if duration > 1.0 else 0.2
+
+            subprocess.run(
+                [
+                    "ffmpeg", "-y",
+                    "-ss", f"{seek_time:.2f}",
+                    "-i", str(wall),
+                    "-vframes", "1",
+                    "-q:v", "3",
+                    str(output_path)
+                ],
+                check=True,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL
+            )
+        except Exception:
+            try:
+                subprocess.run(
+                    [
+                        "ffmpeg", "-y",
+                        "-ss", "00:00:01",
+                        "-i", str(wall),
+                        "-vframes", "1",
+                        "-q:v", "3",
+                        str(output_path)
+                    ],
+                    check=True,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL
+                )
+            except Exception:
+                pass
+            
     return output_path
+
+
+def extract_all_video_thumbs() -> None:
+    from caelestia.utils.paths import wallpapers_dir, c_cache_dir
+    from concurrent.futures import ThreadPoolExecutor
+    import threading
+
+    videothumbs_dir = c_cache_dir / "videothumbs"
+    videothumbs_dir.mkdir(parents=True, exist_ok=True)
+
+    ready_file = Path("/tmp/caelestia_thumb_ready.txt")
+    
+    if ready_file.exists():
+        ready_file.unlink()
+        
+    write_lock = threading.Lock()
+    
+    def process_video(file_path: Path):
+        try:
+            resolved_path = file_path.resolve()
+            h = djb2_hash(str(resolved_path))
+            thumb_path = videothumbs_dir / f"{h}.jpg"
+
+            # Smart check: extract if missing OR if the existing file is a low-res placeholder
+            should_extract = True
+            if thumb_path.exists():
+                try:
+                    with Image.open(thumb_path) as t_img:
+                        if t_img.height >= 500:
+                            should_extract = False
+                except Exception:
+                    pass
+            
+            if should_extract:
+                extract_thumbnail(resolved_path, thumb_path)
+            
+            with write_lock:
+                with ready_file.open("a") as f:
+                    f.write(f"{str(resolved_path)}\n")
+        except Exception as e:
+            print(f"ERROR: {e}")
+
+    video_extensions = {".mp4", ".webm", ".mkv"}
+    videos_to_process = []
+
+    for root_dir, _, files in os.walk(wallpapers_dir):
+        for file in files:
+            file_path = Path(root_dir) / file
+            if file_path.suffix.lower() in video_extensions and file_path.exists():
+                videos_to_process.append(file_path)
+
+    with ThreadPoolExecutor(max_workers=16) as executor:
+        for _ in executor.map(process_video, videos_to_process):
+            pass
 
 
 def set_wallpaper(wall: Path, no_smart: bool) -> None:
     # Make path absolute
     wall = Path(wall).resolve()
 
-    if not is_valid_image(wall):
+    if not is_valid_image(wall) and not is_video(wall):
         raise ValueError(f'"{wall}" is not a valid image or video')
 
-    # Use gif/video's 1st frame for thumb only
     if wall.suffix.lower() == ".gif":
         wall_cache = convert_gif(wall)
     elif is_video(wall):
@@ -204,6 +327,15 @@ def set_wallpaper(wall: Path, no_smart: bool) -> None:
     wallpaper_thumbnail_path.parent.mkdir(parents=True, exist_ok=True)
     wallpaper_thumbnail_path.unlink(missing_ok=True)
     wallpaper_thumbnail_path.symlink_to(thumb)
+
+    if is_video(wall):
+        from caelestia.utils.paths import c_cache_dir
+        videothumbs_dir = c_cache_dir / "videothumbs"
+        videothumbs_dir.mkdir(parents=True, exist_ok=True)
+        fast_thumb = videothumbs_dir / f"{djb2_hash(str(wall.resolve()))}.jpg"
+        if not fast_thumb.exists():
+            import shutil
+            shutil.copy2(thumb, fast_thumb)
 
     scheme = get_scheme()
 
@@ -253,3 +385,4 @@ def set_random(args: Namespace) -> None:
         pass
 
     set_wallpaper(random.choice(wallpapers), args.no_smart)
+
