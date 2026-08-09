@@ -88,7 +88,7 @@ yay -S libnotify swappy grim dart-sass wl-clipboard slurp gpu-screen-recorder gl
 ```
 
 Now, clone the repo, `cd` into it, build the wheel via `python -m build --wheel`
-and install it via `python -m installer dist/*.whl`. Then, to install the `fish`
+and install it via `python -m installer --overwrite-existing dist/*.whl`. Then, to install the `fish`
 completions, copy the `completions/caelestia.fish` file to
 `/usr/share/fish/vendor_completions.d/caelestia.fish`.
 
@@ -96,7 +96,7 @@ completions, copy the `completions/caelestia.fish` file to
 git clone https://github.com/caelestia-dots/cli.git
 cd cli
 python -m build --wheel
-sudo python -m installer dist/*.whl
+sudo python -m installer --overwrite-existing dist/*.whl
 sudo cp completions/caelestia.fish /usr/share/fish/vendor_completions.d/caelestia.fish
 ```
 
