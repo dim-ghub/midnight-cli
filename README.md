@@ -1,6 +1,6 @@
-# caelestia-cli
+# MiDnight cli
 
-The main control script for the Caelestia dotfiles.
+The main control script for the MiDnight dotfiles.
 
 <details><summary id="dependencies">External dependencies</summary>
 
@@ -21,18 +21,18 @@ The main control script for the Caelestia dotfiles.
 
 ### Arch linux
 
-This CLI is avaiable from the AUR as `dim-caelestia-cli-git`.
+This CLI is avaiable from the AUR as `midnight-cli-git`.
 You can install it with an AUR helper like [`yay`](https://github.com/Jguer/yay) or manually downloading the PKGBUILD and running `makepkg -si`
 ```sh
-yay -S dim-caelestia-cli-git
+yay -S midnight-cli-git
 ```
 This CLI can also be installed (and primarily meant to) using `pkgit` package manager (available on the AUR as `pkgit-git`
 ```sh
-pkgit -i https://github.com/dim-ghub/caelestia-cli
+pkgit -i https://github.com/dim-ghub/midnight-cli
 ```
 
 > [!TIP]
-> You can also use `pkgit -qi https://github.com/dim-ghub/caelestia-cli` for a quiet installation.
+> You can also use `pkgit -qi https://github.com/dim-ghub/midnight-cli` for a quiet installation.
 
 > [!NOTE]
 > To opt out of pkgit shell management when building or managing the shell manually, create the marker file: `~/.local/state/caelestia/shell-managed`.
@@ -44,7 +44,7 @@ pkgit -i https://github.com/dim-ghub/caelestia-cli
 You can run the CLI directly via `nix run`:
 
 ```sh
-nix run github:dim-ghub/caelestia-cli
+nix run github:dim-ghub/midnight-cli
 ```
 
 Or add it to your system configuration:
@@ -54,15 +54,15 @@ Or add it to your system configuration:
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
-    caelestia-cli = {
-      url = "github:dim-ghub/caelestia-cli";
+    midnight-cli = {
+      url = "github:dim-ghub/midnight-cli";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 }
 ```
 
-The package is available as `caelestia-cli.packages.<system>.default`, which can be added to your
+The package is available as `midnight-cli.packages.<system>.default`, which can be added to your
 `environment.systemPackages`, `users.users.<username>.packages`, `home.packages` if using home-manager,
 or a devshell. The CLI can then be used via the `caelestia` command.
 
@@ -71,7 +71,7 @@ or a devshell. The CLI can then be used via the `caelestia` command.
 > To enable the shell, use the `with-shell` package. This is the recommended installation method, as
 > the CLI exposes the shell via the `shell` subcommand, meaning there is no need for the shell package
 > to be exposed.
-For home-manager, you can also use the Caelestia's home manager module.
+For home-manager, you can also use the MiDnight's home manager module.
 
 ### Manual installation
 
