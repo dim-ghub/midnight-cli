@@ -194,7 +194,7 @@ class Manifest:
         seen: set[str] = set()
         ordered: list[str] = []
         for pkg in (*self.packages, *(p for c in self._data.enabled_comps for p in self.components[c].packages)):
-            if pkg in ("caelestia-cli", "caelestia-shell"):
+            if pkg in ("caelestia-cli", "caelestia-shell", "polkit-gnome"):
                 continue
             if pkg not in seen:
                 seen.add(pkg)
