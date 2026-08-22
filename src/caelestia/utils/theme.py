@@ -399,10 +399,11 @@ def apply_user_templates(colours: dict[str, str], mode: str) -> None:
     if not user_templates_dir.is_dir():
         return
 
-    for file in user_templates_dir.iterdir():
+    for file in user_templates_dir.rglob("*"):
         if file.is_file():
+            rel_path = file.relative_to(user_templates_dir)
             content = gen_replace_dynamic(colours, file, mode)
-            atomic_write(theme_dir / file.name, content)
+            atomic_write(theme_dir / rel_path, content)
 
 
 def apply_colours(colours: dict[str, str], mode: str) -> None:

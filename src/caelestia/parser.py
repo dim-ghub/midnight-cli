@@ -86,6 +86,27 @@ def parse_args() -> tuple[argparse.ArgumentParser, argparse.Namespace]:
     screenshot_parser.add_argument(
         "-f", "--freeze", action="store_true", help="freeze the screen while selecting a region"
     )
+    screenshot_parser.add_argument(
+        "-c", "--copy", "--clipboard", action="store_true", help="copy screenshot to clipboard without opening an app"
+    )
+    screenshot_parser.add_argument(
+        "-s", "--save", action="store_true", help="save screenshot to disk without opening an app"
+    )
+    screenshot_parser.add_argument(
+        "-e", "--edit", "--open", action="store_true", help="open screenshot in editor application"
+    )
+    screenshot_parser.add_argument(
+        "-n", "--notify", action="store_true", help="show notification with open/save actions"
+    )
+    screenshot_parser.add_argument(
+        "-a", "--app", metavar="APP", help="application command/template to open screenshot with"
+    )
+    screenshot_parser.add_argument(
+        "--action",
+        choices=["edit", "open", "save", "copy", "clipboard", "notify"],
+        help="action to perform on screenshot",
+    )
+    screenshot_parser.add_argument("-F", "--file", help="path to an existing screenshot image to process")
 
     # Create parser for record opts
     record_parser = command_parser.add_parser("record", help="start a screen recording")

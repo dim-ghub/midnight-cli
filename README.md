@@ -200,6 +200,13 @@ All configuration options are in `~/.config/caelestia/cli.json`.
 
 ```json
 {
+    "screenshot": {
+        "app": "swappy",
+        "action": "edit",
+        "regionAction": "edit",
+        "fullscreenAction": "notify",
+        "copyOnSave": true
+    },
     "record": {
         "refreshRate": 60,
         "extraArgs": []
@@ -280,4 +287,9 @@ All configuration options are in `~/.config/caelestia/cli.json`.
 
 </details>
 
+- `screenshot.app` sets the application/command template to open screenshots with (e.g. `"swappy"`, `"satty --filename {}"`, `"tensaku --filename <FILENAME>"`). Can be overridden with `caelestia screenshot -a/--app <app>`.
+- `screenshot.action` sets the default screenshot action (`"edit"`, `"save"`, `"copy"`, `"notify"`). Can be overridden per invocation with flags `-s`/`--save`, `-c`/`--copy`, `-e`/`--edit`, `-n`/`--notify`, or `--action <action>`.
+- `screenshot.regionAction` sets the action specifically for region screenshots (defaults to `"edit"`).
+- `screenshot.fullscreenAction` sets the action specifically for fullscreen screenshots (defaults to `"notify"`).
+- `screenshot.copyOnSave` (boolean, default: `true`) controls whether saving a screenshot also copies it to the clipboard.
 - `record.refreshRate` sets the recording frame rate. When omitted or `null`, the focused monitor's refresh rate is used. It can also be overridden per invocation with `caelestia record --fps <rate>`.

@@ -103,6 +103,12 @@ complete -c caelestia -n "$seen scheme && $seen set" -s 'v' -l 'variant' -d 'Set
 # Screenshot
 complete -c caelestia -n "$seen screenshot" -s 'r' -l 'region' -d 'Capture region'
 complete -c caelestia -n "$seen screenshot" -s 'f' -l 'freeze' -d 'Freeze while selecting region'
+complete -c caelestia -n "$seen screenshot" -s 'c' -l 'copy' -l 'clipboard' -d 'Copy to clipboard without opening an app'
+complete -c caelestia -n "$seen screenshot" -s 's' -l 'save' -d 'Save to disk without opening an app'
+complete -c caelestia -n "$seen screenshot" -s 'e' -l 'edit' -l 'open' -d 'Open in editor application'
+complete -c caelestia -n "$seen screenshot" -s 'n' -l 'notify' -d 'Show interactive notification'
+complete -c caelestia -n "$seen screenshot" -s 'a' -l 'app' -d 'Application to open screenshot with' -r
+complete -c caelestia -n "$seen screenshot" -l 'action' -d 'Action to perform on screenshot' -a 'edit open save copy clipboard notify' -r
 
 # Record
 complete -c caelestia -n "$seen record" -s 'r' -l 'region' -d 'Capture region'
