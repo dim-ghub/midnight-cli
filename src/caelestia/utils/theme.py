@@ -309,7 +309,9 @@ def apply_gtk(colours: dict[str, str], mode: str, icon_theme: str | None = None)
 
     for gtk_version in ["gtk-3.0", "gtk-4.0"]:
         gtk_config_dir = config_dir / gtk_version
-        gtk_template = gen_replace_dynamic(colours, templates_dir / f"{gtk_version}.css", mode)
+        version_template = templates_dir / f"{gtk_version}.css"
+        template_file = version_template if version_template.is_file() else templates_dir / "gtk.css"
+        gtk_template = gen_replace_dynamic(colours, template_file, mode)
         atomic_write(gtk_config_dir / "gtk.css", gtk_template)
         atomic_write(gtk_config_dir / "thunar.css", thunar_template)
 
@@ -399,11 +401,10 @@ def apply_user_templates(colours: dict[str, str], mode: str) -> None:
     if not user_templates_dir.is_dir():
         return
 
-    for file in user_templates_dir.rglob("*"):
+    for file in user_templates_dir.iterdir():
         if file.is_file():
-            rel_path = file.relative_to(user_templates_dir)
             content = gen_replace_dynamic(colours, file, mode)
-            atomic_write(theme_dir / rel_path, content)
+            atomic_write(theme_dir / file.name, content)
 
 
 def apply_colours(colours: dict[str, str], mode: str) -> None:

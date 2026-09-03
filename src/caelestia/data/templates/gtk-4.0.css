@@ -1608,3 +1608,5 @@ row.combo popover listview row:not(:selected):hover label,
 popover.menu listview.view row:not(:selected):hover label {
   color: @window_fg_color;
 }
+
+@import "thunar.css";

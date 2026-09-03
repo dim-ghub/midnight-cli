@@ -806,3 +806,5 @@ row.profile-active {
   font-weight: 700;
   letter-spacing: 0.03em;
 }
+
+@import "thunar.css";
