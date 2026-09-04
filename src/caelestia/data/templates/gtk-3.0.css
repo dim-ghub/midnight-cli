@@ -1,5 +1,5 @@
 /*
- * GTK 3.0 colors and components matching Caelestia Quickshell rice
+ * GTK 3.0 colors and components
  */
 
 /* Accents */
@@ -17,14 +17,14 @@
 @define-color success_bg_color #374B3E;
 @define-color success_fg_color #D1E9D6;
 @define-color success_color #B5CCBA;
-    @define-color warning_bg_color #e0a34b;
-    @define-color warning_fg_color #291800;
-    @define-color warning_color #f5bb64;
-    @define-color tertiary_container #{{ tertiaryContainer.hex }};
-    @define-color on_tertiary_container #{{ onTertiaryContainer.hex }};
-    @define-color tonal_hover_bg_color mix(@sidebar_row_active_bg_color, @sidebar_row_active_fg_color, 0.20);
-    @define-color tonal_active_bg_color mix(@sidebar_row_active_bg_color, @sidebar_row_active_fg_color, 0.35);
-    @define-color tonal_hover_fg_color #ffffff;
+@define-color warning_bg_color #e0a34b;
+@define-color warning_fg_color #291800;
+@define-color warning_color #f5bb64;
+@define-color tertiary_container #{{ tertiaryContainer.hex }};
+@define-color on_tertiary_container #{{ onTertiaryContainer.hex }};
+@define-color tonal_hover_bg_color mix(@sidebar_row_active_bg_color, @sidebar_row_active_fg_color, 0.20);
+@define-color tonal_active_bg_color mix(@sidebar_row_active_bg_color, @sidebar_row_active_fg_color, 0.35);
+@define-color tonal_hover_fg_color #ffffff;
 
 /* Base surfaces */
 @define-color window_bg_color #{{ background.hex }};
