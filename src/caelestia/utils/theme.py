@@ -309,9 +309,7 @@ def apply_gtk(colours: dict[str, str], mode: str, icon_theme: str | None = None)
 
     for gtk_version in ["gtk-3.0", "gtk-4.0"]:
         gtk_config_dir = config_dir / gtk_version
-        version_template = templates_dir / f"{gtk_version}.css"
-        template_file = version_template if version_template.is_file() else templates_dir / "gtk.css"
-        gtk_template = gen_replace_dynamic(colours, template_file, mode)
+        gtk_template = gen_replace_dynamic(colours, templates_dir / f"{gtk_version}.css", mode)
         atomic_write(gtk_config_dir / "gtk.css", gtk_template)
         atomic_write(gtk_config_dir / "thunar.css", thunar_template)
 
