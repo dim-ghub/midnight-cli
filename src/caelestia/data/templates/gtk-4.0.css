@@ -545,7 +545,7 @@ scale:not(.vertical) > trough > highlight {
   background-color: @accent_color;
   border: none;
   box-shadow: none;
-  margin-right: 4px;
+  margin-right: 6px;
 }
 
 scale.horizontal > trough > slider,
@@ -600,7 +600,7 @@ scale.vertical > trough > highlight {
   background-color: @accent_color;
   border: none;
   box-shadow: none;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 
 scale.vertical > trough > slider {
