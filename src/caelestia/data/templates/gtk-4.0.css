@@ -1,7 +1,3 @@
-/*
-* GTK 4.0 colors based on end-4 matugen template
-*/
-
 @media (prefers-color-scheme: light) {
     /* Accents */
     @define-color accent_color #{{ primary.hex }};
